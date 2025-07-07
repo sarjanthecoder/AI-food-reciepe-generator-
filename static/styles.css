@@ -1,0 +1,21 @@
+
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(to right, #0699ca, #0dadd9);
+    color: #f6f7f8;
+}
+.header {
+    text-align: center;
+    padding: 25px;
+    font-size: 32px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #fff;
+    background: linear-gradient(to right, #003e58, #005363);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 0 10px #4fc3f7, 0 0 20px #4fc3f7;
+}
+/* Additional CSS remains unchanged */

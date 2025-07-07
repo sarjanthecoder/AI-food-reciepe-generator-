@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Recipe Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    html, body {
+      height: 100%; margin: 0; padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: url('static/fit.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .container {
+      width: 100vw;
+      min-height: 100vh;
+      margin: 0;
+      padding: 60px 40px 80px 40px;
+      background: rgba(255, 255, 255, 0);
+      border-radius: 20;
+      box-shadow: 0 0 25px 8px #30fa02 inset, 0 25px 8px #30fa02;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      box-sizing: border-box;
+      position: relative;
+      z-index: 1;
+    }
+    #dish-image {
+      position: absolute;
+      top: 190px;
+      right: 50px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #ffffff;
+      box-shadow: 0 0 10px #000;
+      display: none;
+      z-index: 11;
+    }
+    .mic-button {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #30fa02;
+  border: none;
+  border-radius: 50%;
+  padding: 6px;
+  font-size: 18px;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 0 10px #30fa02, 0 0 20px #30fa02 inset;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.mic-button:hover {
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 0 20px #1cf100, 0 0 30px #1cf100 inset;
+}
+
+    .header {
+      text-align: center;
+      font-size: 36px;
+      margin-bottom: 20px;
+      color: #000000;
+      text-shadow: 0 0 10px #ffcc00;
+    }
+    .main-content {
+      display: flex;
+      gap: 30px;
+      flex: 1;
+      overflow: hidden;
+    }
+    .left-panel, .right-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    .glow-input, .glow-select, .glow-button {
+      width: 35%;
+      margin: 30px 0;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 12px;
+      margin-left: 30px;
+      background: #0d1b2a;
+      color: #ffffff;
+      box-shadow: 0 0 10px #4ae302;
+    }
+    .glow-button {
+      background: #04ef08;
+      color: #000;
+      font-weight: bold;
+      text-shadow: 0 0 5px #000;
+      box-shadow: 0 0 20px #ffe605;
+      cursor: pointer;
+      transition: box-shadow 0.3s ease;
+    }
+    .glow-button:hover {
+      box-shadow: 0 0 40px #2ff203;
+    }
+    .save-pdf-button {
+      align-self: flex-end;
+      margin-bottom: 10px;
+      padding: 10px 20px;
+      background: #ffcc00;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 0 10px #ffcc00;
+    }
+    .save-pdf-button:hover {
+      box-shadow: 0 0 20px #ffcc00;
+    }
+    .output-box {
+      background: #ffd500;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 10px;
+      box-shadow: inset 0 0 15px #65ab5f;
+      color: #000000;
+      flex-grow: 1;
+      overflow-y: auto;
+      max-height: 400px;
+      position: relative;
+    }
+    .cooking-animation {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 50px;
+      height: 50px;
+      background-image: url('cooking.gif');
+      background-size: contain;
+      background-repeat: no-repeat;
+      z-index: 10;
+      display: none;
+      animation: flip 1s infinite;
+    }
+    @keyframes flip {
+      0% { transform: rotate(0deg); }
+      50% { transform: rotate(180deg); }
+      100% { transform: rotate(360deg); }
+    }
+      
+ /* =========================================================
+   MOBILE‑ONLY FIXES  ( ≤ 600 px )
+   Append this at the bottom of your existing CSS
+   ========================================================= */
+@media (max-width: 600px) {
+  body {
+    background: url('static/fit.jpg') no-repeat center center fixed;
+    background-size: cover;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .container {
+    width: 90%;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px 15px;
+    border-radius: 10px;
+    box-shadow: none;
+    background-color: rgba(255, 255, 255, 0.9);
+  }
+
+  .main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    align-items: center;
+  }
+
+  .left-panel,
+  .right-panel {
+    width: 100%;
+    text-align: center;
+  }
+
+  .left-panel > div {
+    position: relative;
+    width: 100%;
+    margin: 10px 0;
+  }
+
+  #dish-name {
+    width: 100% !important;
+    padding: 10px 45px 10px 12px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+
+  .mic-button {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    border: none;
+    background-color: #00ff00;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .glow-input,
+  .glow-select,
+  .glow-button,
+  .save-pdf-button,
+  .output-box {
+    width: 100%;
+    margin: 10px 0;
+  }
+
+  #disease-name,
+  #meal-time {
+    width: 100% !important;
+  }
+
+#dish-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  margin: 20px auto;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+  .output-box {
+    max-height: 300px;
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .header {
+    font-size: 22px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+}
+
+
+    
+  </style>
+</head>
+<body>
+  <audio id="sizzle-audio" src="sizzle.mp3" preload="auto"></audio>
+  <div class="container">
+    <div class="header">COOK WITH ME </div>
+    <div class="main-content">
+      <div class="left-panel">
+        <div style="position: relative; width: fit-content;">
+         <input type="text" id="dish-name" class="glow-input" placeholder="Enter dish name" style="padding-right: 40px; width: 69%;" />
+
+          <button onclick="startListening()" class="mic-button">🎤</button>
+
+        </div>
+        <select id="health-type" class="glow-select" onchange="toggleDiseaseInput(this.value)">
+          <option value="healthy">Healthy</option>
+          <option value="sick">Suffered by some issue</option>
+        </select>
+        <input type="text" id="disease-name" class="glow-input" placeholder="Enter your disease" style="display: none; width: 100px;" />
+        <input type="text" id="meal-time" class="glow-input" placeholder="Enter meal time (e.g. Breakfast, Lunch, Dinner)" style="width: 215px;" />
+        <button onclick="generateRecipe()" id="generate-btn" class="glow-button">Generate Recipe</button>
+        <button onclick="suggestByDisease()" id="suggest-btn" class="glow-button" style="display: none;">Suggest Foods Based on Disease</button>
+      </div>
+      <div class="right-panel">
+        <img id="dish-image" />
+        <button onclick="saveAsPDF()" class="save-pdf-button">Save as PDF</button>
+        <div class="output-box" id="output">
+          <div class="cooking-animation" id="cookingAnim"></div>
+          <div id="outputContent">Recipe output will appear here based on your health condition.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const toggleCookingAnimation = (show) => {
+      const anim = document.getElementById('cookingAnim');
+      const audio = document.getElementById('sizzle-audio');
+      anim.style.display = show ? 'block' : 'none';
+      show ? audio.play() : audio.pause();
+    };
+
+    const startListening = () => {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      recognition.start();
+      recognition.onresult = (event) => {
+        document.getElementById('dish-name').value = event.results[0][0].transcript;
+      };
+    };
+    function toggleDiseaseInput(value) {
+  const diseaseInput = document.getElementById('disease-name');
+  const generateBtn = document.getElementById('generate-btn');
+  const suggestBtn = document.getElementById('suggest-btn');
+
+  if (value === 'sick') {
+    diseaseInput.style.display = 'block';
+    generateBtn.style.display = 'none';
+    suggestBtn.style.display = 'block';
+  } else {
+    diseaseInput.style.display = 'none';
+    generateBtn.style.display = 'block';
+    suggestBtn.style.display = 'none';
+  }
+}
+async function suggestByDisease() {
+  const disease = document.getElementById('disease-name').value.trim();
+  const dish = document.getElementById('dish-name').value.trim();
+  const outputContent = document.getElementById('outputContent');
+
+  if (!disease || !dish) {
+    outputContent.innerHTML = `<span style="color:red;">❗ Please enter both dish and disease name.</span>`;
+    return;
+  }
+
+  toggleCookingAnimation(true);
+  outputContent.innerHTML = `⏳ Fetching suggestions for <b>${disease}</b>...`;
+
+  const prompt = `The user is suffering from '${disease}' and wants to eat '${dish}'. Suggest whether to avoid it or not. Also provide appropriate dietary guidance and home remedies. Use only headings such as Ingredients (if allowed), Avoid Dish Recommendation, and Home Remedies.`;
+
+  try {
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt })
+    });
+
+    const data = await response.json();
+    outputContent.innerHTML = data.text.replace(/\n/g, '<br>');
+  } catch (err) {
+    outputContent.innerHTML = `<span style="color:red;">❌ Error: ${err.message}</span>`;
+  } finally {
+    toggleCookingAnimation(false);
+  }
+}
+
+
+   const generateRecipe = async () => {
+     
+
+  const dish = document.getElementById('dish-name').value.trim();
+  const meal = document.getElementById('meal-time').value.trim();
+  const outputContent = document.getElementById('outputContent');
+  const dishImage = document.getElementById('dish-image');
+
+  if (!dish || !meal) {
+    outputContent.innerHTML = '<span style="color: red;">❌ Please enter both the dish name and meal time.</span>';
+    dishImage.style.display = 'none';
+    return;
+  }
+
+  toggleCookingAnimation(true);
+  outputContent.innerHTML = 'Generating recipe...';
+  dishImage.style.display = 'none';
+
+  const prompt = `Provide only the ingredients and preparation method for '${dish}' suitable for a healthy person during '${meal}' time. Use title headings: Ingredients and Preparation Method. Do not include any introductions or summaries.`;
+
+  try {
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await response.json();
+
+    if (!data.text) throw new Error(data.error || "No response");
+
+    outputContent.innerHTML = data.text.replace(/\n/g, '<br>');
+        // ✅ Clear input fields after successful generation
+    document.getElementById('dish-name').value = '';
+    document.getElementById('meal-time').value = '';
+
+
+    // 🌄 Fetch image from Pixabay
+  // Fetch image from Pixabay
+const pixabayKey = "51164837-d21699e326105178316bad47a"; // 🔑 Replace with your key
+const imageQuery = encodeURIComponent(dish);
+const pixabayUrl = `https://pixabay.com/api/?key=${pixabayKey}&q=${imageQuery}&image_type=photo&category=food&per_page=3`;
+
+try {
+  const imageRes = await fetch(pixabayUrl);
+  const imageJson = await imageRes.json();
+  const imageElement = document.getElementById("dish-image");
+
+  if (imageJson.hits && imageJson.hits.length > 0) {
+    imageElement.src = imageJson.hits[0].webformatURL;
+    imageElement.style.display = "block";
+  } else {
+    imageElement.style.display = "none";
+  }
+} catch (imgErr) {
+  console.warn("Image fetch failed:", imgErr);
+} finally {
+    toggleCookingAnimation(false);
+  }
+} catch (err) {
+    outputContent.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+    dishImage.style.display = 'none';
+  } finally {
+    toggleCookingAnimation(false);
+  }
+};
+
+    
+function saveAsPDF() {
+  const dish = document.getElementById('dish-name').value.trim() || 'recipe';
+  const outputContent = document.getElementById('outputContent');
+  const outputText = outputContent.innerText.trim();
+
+  // ✅ Prevent saving default or empty output
+  if (
+    !outputText ||
+    outputText === 'Generating recipe...' ||
+    outputText.includes('Recipe output will appear here')
+  ) {
+    alert("⚠️ No valid recipe to save.");
+    return;
+  }
+
+  // ✅ Access jsPDF from window
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const lines = doc.splitTextToSize(outputText, 180);
+
+  const backgroundImage = new Image();
+  backgroundImage.src = 'static/pdfbg.jpg'; // ✅ Make sure this file exists
+
+  backgroundImage.onload = function () {
+    let y = 10;
+
+    doc.addImage(backgroundImage, 'JPEG', 0, 0, 210, 297); // A4 page
+
+    lines.forEach((line) => {
+      if (y > 280) {
+        doc.addPage();
+        doc.addImage(backgroundImage, 'JPEG', 0, 0, 210, 297);
+        y = 10;
+      }
+      doc.text(line, 10, y);
+      y += 10;
+    });
+
+    doc.save(`${dish.replace(/\s+/g, '_')}.pdf`);
+  };
+
+  backgroundImage.onerror = function () {
+    alert("⚠️ PDF background image not found or failed to load.");
+  };
+}
+
+
+  </script>
+</body>
+</html>
