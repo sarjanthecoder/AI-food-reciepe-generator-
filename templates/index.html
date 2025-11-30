@@ -1,485 +1,717 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Recipe Generator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodGlow - AI Recipe Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <style>
-    html, body {
-      height: 100%; margin: 0; padding: 0;
-    }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: url('static/fit.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: #ffffff;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-    }
-    .container {
-      width: 100vw;
-      min-height: 100vh;
-      margin: 0;
-      padding: 60px 40px 80px 40px;
-      background: rgba(255, 255, 255, 0);
-      border-radius: 20;
-      box-shadow: 0 0 25px 8px #30fa02 inset, 0 25px 8px #30fa02;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      box-sizing: border-box;
-      position: relative;
-      z-index: 1;
-    }
-    #dish-image {
-      position: absolute;
-      top: 190px;
-      right: 50px;
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid #ffffff;
-      box-shadow: 0 0 10px #000;
-      display: none;
-      z-index: 11;
-    }
-    .mic-button {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: #30fa02;
-  border: none;
-  border-radius: 50%;
-  padding: 6px;
-  font-size: 18px;
-  color: white;
-  cursor: pointer;
-  box-shadow: 0 0 10px #30fa02, 0 0 20px #30fa02 inset;
-  transition: transform 0.2s ease, box-shadow 0.3s ease;
-}
+        :root {
+            --primary-yellow: #FFD700;
+            --primary-green: #7FFF00;
+            --accent-lime: #ADFF2F;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
 
-.mic-button:hover {
-  transform: translateY(-50%) scale(1.1);
-  box-shadow: 0 0 20px #1cf100, 0 0 30px #1cf100 inset;
-}
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-attachment: fixed;
+            overflow-x: hidden;
+        }
 
-    .header {
-      text-align: center;
-      font-size: 36px;
-      margin-bottom: 20px;
-      color: #000000;
-      text-shadow: 0 0 10px #ffcc00;
-    }
-    .main-content {
-      display: flex;
-      gap: 30px;
-      flex: 1;
-      overflow: hidden;
-    }
-    .left-panel, .right-panel {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-    }
-    .glow-input, .glow-select, .glow-button {
-      width: 35%;
-      margin: 30px 0;
-      padding: 12px;
-      font-size: 16px;
-      border: none;
-      border-radius: 12px;
-      margin-left: 30px;
-      background: #0d1b2a;
-      color: #ffffff;
-      box-shadow: 0 0 10px #4ae302;
-    }
-    .glow-button {
-      background: #04ef08;
-      color: #000;
-      font-weight: bold;
-      text-shadow: 0 0 5px #000;
-      box-shadow: 0 0 20px #ffe605;
-      cursor: pointer;
-      transition: box-shadow 0.3s ease;
-    }
-    .glow-button:hover {
-      box-shadow: 0 0 40px #2ff203;
-    }
-    .save-pdf-button {
-      align-self: flex-end;
-      margin-bottom: 10px;
-      padding: 10px 20px;
-      background: #ffcc00;
-      color: #000;
-      font-weight: bold;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      box-shadow: 0 0 10px #ffcc00;
-    }
-    .save-pdf-button:hover {
-      box-shadow: 0 0 20px #ffcc00;
-    }
-    .output-box {
-      background: #ffd500;
-      padding: 20px;
-      border-radius: 12px;
-      margin-top: 10px;
-      box-shadow: inset 0 0 15px #65ab5f;
-      color: #000000;
-      flex-grow: 1;
-      overflow-y: auto;
-      max-height: 400px;
-      position: relative;
-    }
-    .cooking-animation {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      width: 50px;
-      height: 50px;
-      background-image: url('cooking.gif');
-      background-size: contain;
-      background-repeat: no-repeat;
-      z-index: 10;
-      display: none;
-      animation: flip 1s infinite;
-    }
-    @keyframes flip {
-      0% { transform: rotate(0deg); }
-      50% { transform: rotate(180deg); }
-      100% { transform: rotate(360deg); }
-    }
-      
- /* =========================================================
-   MOBILE‑ONLY FIXES  ( ≤ 600 px )
-   Append this at the bottom of your existing CSS
-   ========================================================= */
-@media (max-width: 600px) {
-  body {
-    background: url('static/fit.jpg') no-repeat center center fixed;
-    background-size: cover;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+        /* Animated Background Circles */
+        .bg-decoration {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            z-index: 0;
+            animation: float 20s infinite ease-in-out;
+        }
 
-  .container {
-    width: 90%;
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 20px 15px;
-    border-radius: 10px;
-    box-shadow: none;
-    background-color: rgba(255, 255, 255, 0.9);
-  }
+        .circle1 {
+            width: 400px;
+            height: 400px;
+            background: var(--primary-yellow);
+            top: -200px;
+            left: -200px;
+        }
 
-  .main-content {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    width: 100%;
-    align-items: center;
-  }
+        .circle2 {
+            width: 500px;
+            height: 500px;
+            background: var(--primary-green);
+            bottom: -250px;
+            right: -250px;
+            animation-delay: 5s;
+        }
 
-  .left-panel,
-  .right-panel {
-    width: 100%;
-    text-align: center;
-  }
+        .circle3 {
+            width: 300px;
+            height: 300px;
+            background: var(--accent-lime);
+            top: 50%;
+            left: 50%;
+            animation-delay: 10s;
+        }
 
-  .left-panel > div {
-    position: relative;
-    width: 100%;
-    margin: 10px 0;
-  }
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(50px, 50px); }
+        }
 
-  #dish-name {
-    width: 100% !important;
-    padding: 10px 45px 10px 12px;
-    box-sizing: border-box;
-    border-radius: 8px;
-    font-size: 16px;
-  }
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 5%;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
 
-  .mic-button {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    width: 30px;
-    height: 30px;
-    border: none;
-    background-color: #00ff00;
-    border-radius: 50%;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-  .glow-input,
-  .glow-select,
-  .glow-button,
-  .save-pdf-button,
-  .output-box {
-    width: 100%;
-    margin: 10px 0;
-  }
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-yellow), var(--primary-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
 
-  #disease-name,
-  #meal-time {
-    width: 100% !important;
-  }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 2rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
 
-#dish-image {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  object-fit: cover;
-  display: block;
-  margin: 20px auto;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
+        nav a:hover {
+            color: var(--primary-yellow);
+            text-shadow: 0 0 20px var(--primary-yellow);
+        }
 
-  .output-box {
-    max-height: 300px;
-    font-size: 14px;
-    padding: 10px;
-  }
+        /* Landing Page */
+        #landing {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+            padding-top: 80px;
+        }
 
-  .header {
-    font-size: 22px;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-}
+        .hero {
+            text-align: center;
+            color: white;
+            max-width: 800px;
+            padding: 2rem;
+        }
 
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-yellow), var(--primary-green), var(--accent-lime));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 3s ease-in-out infinite;
+        }
 
-    
-  </style>
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8)); }
+            50% { filter: drop-shadow(0 0 40px rgba(127, 255, 0, 0.8)); }
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, var(--primary-yellow), var(--primary-green));
+            border: none;
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 32px rgba(255, 215, 0, 0.4);
+            color: #333;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 48px rgba(127, 255, 0, 0.6);
+        }
+
+        /* App Section */
+        #app-section {
+            min-height: 100vh;
+            padding: 120px 5% 100px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 3rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .app-title {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            background: linear-gradient(135deg, var(--primary-yellow), var(--primary-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .glass-input, .glass-select {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            color: white;
+            font-size: 1rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .glass-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .glass-input:focus, .glass-select:focus {
+            outline: none;
+            border-color: var(--primary-yellow);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .mic-button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, var(--primary-yellow), var(--primary-green));
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .mic-button:hover {
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 25px rgba(127, 255, 0, 0.6);
+        }
+
+        .glass-button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary-yellow), var(--primary-green));
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+            color: #333;
+            margin-top: 1rem;
+        }
+
+        .glass-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(127, 255, 0, 0.6);
+        }
+
+        .output-card {
+            position: relative;
+        }
+
+        #dish-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 20px;
+            object-fit: cover;
+            margin: 0 auto 1.5rem;
+            display: none;
+            border: 3px solid var(--primary-yellow);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+        }
+
+        .save-pdf-button {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(255, 215, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--primary-yellow);
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+
+        .save-pdf-button:hover {
+            background: rgba(255, 215, 0, 0.5);
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .output-box {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(15px);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            min-height: 400px;
+            max-height: 500px;
+            overflow-y: auto;
+            color: white;
+            line-height: 1.8;
+        }
+
+        .output-box::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .output-box::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .output-box::-webkit-scrollbar-thumb {
+            background: var(--primary-yellow);
+            border-radius: 10px;
+        }
+
+        .cooking-animation {
+            text-align: center;
+            font-size: 3rem;
+            animation: rotate 2s linear infinite;
+            display: none;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 3rem 5%;
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            color: var(--primary-yellow);
+            margin-bottom: 1rem;
+        }
+
+        .footer-section p, .footer-section a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: var(--primary-green);
+            padding-left: 5px;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .app-title {
+                font-size: 2rem;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            nav {
+                display: none;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+
+            .app-container {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+            }
+
+            .cta-button {
+                padding: 0.8rem 2rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <audio id="sizzle-audio" src="sizzle.mp3" preload="auto"></audio>
-  <div class="container">
-    <div class="header">COOK WITH ME </div>
-    <div class="main-content">
-      <div class="left-panel">
-        <div style="position: relative; width: fit-content;">
-         <input type="text" id="dish-name" class="glow-input" placeholder="Enter dish name" style="padding-right: 40px; width: 69%;" />
+    <audio id="sizzle-audio" src="sizzle.mp3" preload="auto"></audio>
 
-          <button onclick="startListening()" class="mic-button">🎤</button>
+    <!-- Background Decorations -->
+    <div class="bg-decoration circle1"></div>
+    <div class="bg-decoration circle2"></div>
+    <div class="bg-decoration circle3"></div>
 
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo">🍳 FoodGlow</div>
+            <nav>
+                <a href="#landing">Home</a>
+                <a href="#app-section">Generator</a>
+                <a href="#footer">About</a>
+            </nav>
         </div>
-        <select id="health-type" class="glow-select" onchange="toggleDiseaseInput(this.value)">
-          <option value="healthy">Healthy</option>
-          <option value="sick">Suffered by some issue</option>
-        </select>
-        <input type="text" id="disease-name" class="glow-input" placeholder="Enter your disease" style="display: none; width: 100px;" />
-        <input type="text" id="meal-time" class="glow-input" placeholder="Enter meal time (e.g. Breakfast, Lunch, Dinner)" style="width: 215px;" />
-        <button onclick="generateRecipe()" id="generate-btn" class="glow-button">Generate Recipe</button>
-        <button onclick="suggestByDisease()" id="suggest-btn" class="glow-button" style="display: none;">Suggest Foods Based on Disease</button>
-      </div>
-      <div class="right-panel">
-        <img id="dish-image" />
-        <button onclick="saveAsPDF()" class="save-pdf-button">Save as PDF</button>
-        <div class="output-box" id="output">
-          <div class="cooking-animation" id="cookingAnim"></div>
-          <div id="outputContent">Recipe output will appear here based on your health condition.</div>
+    </header>
+
+    <!-- Landing Page -->
+    <section id="landing">
+        <div class="hero">
+            <h1>✨ Cook with AI Magic ✨</h1>
+            <p>Transform your ingredients into delicious recipes with the power of artificial intelligence. Healthy, tasty, and personalized just for you!</p>
+            <button class="cta-button" onclick="scrollToApp()">Start Cooking Now 🚀</button>
         </div>
-      </div>
-    </div>
-  </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-    const toggleCookingAnimation = (show) => {
-      const anim = document.getElementById('cookingAnim');
-      const audio = document.getElementById('sizzle-audio');
-      anim.style.display = show ? 'block' : 'none';
-      show ? audio.play() : audio.pause();
-    };
+    </section>
 
-    const startListening = () => {
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = 'en-US';
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-      recognition.start();
-      recognition.onresult = (event) => {
-        document.getElementById('dish-name').value = event.results[0][0].transcript;
-      };
-    };
-    function toggleDiseaseInput(value) {
-  const diseaseInput = document.getElementById('disease-name');
-  const generateBtn = document.getElementById('generate-btn');
-  const suggestBtn = document.getElementById('suggest-btn');
+    <!-- App Section -->
+    <section id="app-section">
+        <div class="app-container">
+            <h2 class="app-title">🍽️ AI Recipe Generator</h2>
+            
+            <div class="main-content">
+                <!-- Left Panel -->
+                <div class="glass-card">
+                    <div class="input-group">
+                        <input type="text" id="dish-name" class="glass-input" placeholder="🍕 Enter dish name">
+                        <button class="mic-button" onclick="startListening()">🎤</button>
+                    </div>
 
-  if (value === 'sick') {
-    diseaseInput.style.display = 'block';
-    generateBtn.style.display = 'none';
-    suggestBtn.style.display = 'block';
-  } else {
-    diseaseInput.style.display = 'none';
-    generateBtn.style.display = 'block';
-    suggestBtn.style.display = 'none';
-  }
-}
-async function suggestByDisease() {
-  const disease = document.getElementById('disease-name').value.trim();
-  const dish = document.getElementById('dish-name').value.trim();
-  const outputContent = document.getElementById('outputContent');
+                    <div class="input-group">
+                        <select id="health-type" class="glass-select" onchange="toggleDiseaseInput(this.value)">
+                            <option value="healthy">🥗 Healthy</option>
+                            <option value="sick">🏥 Health Condition</option>
+                        </select>
+                    </div>
 
-  if (!disease || !dish) {
-    outputContent.innerHTML = `<span style="color:red;">❗ Please enter both dish and disease name.</span>`;
-    return;
-  }
+                    <div class="input-group" id="disease-group" style="display: none;">
+                        <input type="text" id="disease-name" class="glass-input" placeholder="Enter your condition">
+                    </div>
 
-  toggleCookingAnimation(true);
-  outputContent.innerHTML = `⏳ Fetching suggestions for <b>${disease}</b>...`;
+                    <div class="input-group">
+                        <input type="text" id="meal-time" class="glass-input" placeholder="🕐 Breakfast, Lunch, Dinner">
+                    </div>
 
-  const prompt = `The user is suffering from '${disease}' and wants to eat '${dish}'. Suggest whether to avoid it or not. Also provide appropriate dietary guidance and home remedies. Use only headings such as Ingredients (if allowed), Avoid Dish Recommendation, and Home Remedies.`;
+                    <button class="glass-button" id="generate-btn" onclick="generateRecipe()">
+                        Generate Recipe ✨
+                    </button>
+                    <button class="glass-button" id="suggest-btn" onclick="suggestByDisease()" style="display: none;">
+                        Get Health Suggestions 💊
+                    </button>
+                </div>
 
-  try {
-    const response = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt })
-    });
+                <!-- Right Panel -->
+                <div class="glass-card output-card">
+                    <img id="dish-image" />
+                    <button class="save-pdf-button" onclick="saveAsPDF()">💾 Save as PDF</button>
+                    
+                    <div class="output-box" id="output">
+                        <div class="cooking-animation" id="cookingAnim">👨‍🍳</div>
+                        <div id="outputContent">Your delicious recipe will appear here! Enter a dish name and meal time to get started. 🌟</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    const data = await response.json();
-    outputContent.innerHTML = data.text.replace(/\n/g, '<br>');
-  } catch (err) {
-    outputContent.innerHTML = `<span style="color:red;">❌ Error: ${err.message}</span>`;
-  } finally {
-    toggleCookingAnimation(false);
-  }
-}
+    <!-- Footer -->
+    <footer id="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>🍳 FoodGlow</h3>
+                <p>AI-powered recipe generation for healthy and delicious cooking experiences.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <a href="#landing">Home</a>
+                <a href="#app-section">Recipe Generator</a>
+                <a href="#">Blog</a>
+            </div>
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <p>Email: hello@foodglow.com</p>
+                <p>Phone: +1 234 567 8900</p>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <a href="#">Instagram</a>
+                <a href="#">Facebook</a>
+                <a href="#">Twitter</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 FoodGlow. All rights reserved. Made with ❤️ </p>
+        </div>
+    </footer>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        function scrollToApp() {
+            document.getElementById('app-section').scrollIntoView({ behavior: 'smooth' });
+        }
 
-   const generateRecipe = async () => {
-     
+        const toggleCookingAnimation = (show) => {
+            const anim = document.getElementById('cookingAnim');
+            const audio = document.getElementById('sizzle-audio');
+            anim.style.display = show ? 'block' : 'none';
+            if (show) {
+                audio.play().catch(() => {});
+            } else {
+                audio.pause();
+            }
+        };
 
-  const dish = document.getElementById('dish-name').value.trim();
-  const meal = document.getElementById('meal-time').value.trim();
-  const outputContent = document.getElementById('outputContent');
-  const dishImage = document.getElementById('dish-image');
+        const startListening = () => {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+            recognition.start();
+            recognition.onresult = (event) => {
+                document.getElementById('dish-name').value = event.results[0][0].transcript;
+            };
+        };
 
-  if (!dish || !meal) {
-    outputContent.innerHTML = '<span style="color: red;">❌ Please enter both the dish name and meal time.</span>';
-    dishImage.style.display = 'none';
-    return;
-  }
+        function toggleDiseaseInput(value) {
+            const diseaseGroup = document.getElementById('disease-group');
+            const generateBtn = document.getElementById('generate-btn');
+            const suggestBtn = document.getElementById('suggest-btn');
 
-  toggleCookingAnimation(true);
-  outputContent.innerHTML = 'Generating recipe...';
-  dishImage.style.display = 'none';
+            if (value === 'sick') {
+                diseaseGroup.style.display = 'block';
+                generateBtn.style.display = 'none';
+                suggestBtn.style.display = 'block';
+            } else {
+                diseaseGroup.style.display = 'none';
+                generateBtn.style.display = 'block';
+                suggestBtn.style.display = 'none';
+            }
+        }
 
-  const prompt = `Provide only the ingredients and preparation method for '${dish}' suitable for a healthy person during '${meal}' time. Use title headings: Ingredients and Preparation Method. Do not include any introductions or summaries.`;
+        async function suggestByDisease() {
+            const disease = document.getElementById('disease-name').value.trim();
+            const dish = document.getElementById('dish-name').value.trim();
+            const outputContent = document.getElementById('outputContent');
 
-  try {
-    const response = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt })
-    });
-    const data = await response.json();
+            if (!disease || !dish) {
+                outputContent.innerHTML = '<span style="color:#FFD700;">❗ Please enter both dish and condition name.</span>';
+                return;
+            }
 
-    if (!data.text) throw new Error(data.error || "No response");
+            toggleCookingAnimation(true);
+            outputContent.innerHTML = '⏳ Analyzing health recommendations...';
 
-    outputContent.innerHTML = data.text.replace(/\n/g, '<br>');
-        // ✅ Clear input fields after successful generation
-    document.getElementById('dish-name').value = '';
-    document.getElementById('meal-time').value = '';
+            const prompt = `The user has '${disease}' and wants to eat '${dish}'. Suggest whether to avoid it or not. Provide dietary guidance and home remedies. Use headings: Ingredients (if allowed), Recommendations, and Home Remedies.`;
 
+            try {
+                const response = await fetch("/api/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt })
+                });
 
-    // 🌄 Fetch image from Pixabay
-  // Fetch image from Pixabay
-const pixabayKey = "51164837-d21699e326105178316bad47a"; // 🔑 Replace with your key
-const imageQuery = encodeURIComponent(dish);
-const pixabayUrl = `https://pixabay.com/api/?key=${pixabayKey}&q=${imageQuery}&image_type=photo&category=food&per_page=3`;
+                const data = await response.json();
+                outputContent.innerHTML = data.text.replace(/\n/g, '<br>');
+            } catch (err) {
+                outputContent.innerHTML = `<span style="color:#FFD700;">❌ Error: ${err.message}</span>`;
+            } finally {
+                toggleCookingAnimation(false);
+            }
+        }
 
-try {
-  const imageRes = await fetch(pixabayUrl);
-  const imageJson = await imageRes.json();
-  const imageElement = document.getElementById("dish-image");
+        const generateRecipe = async () => {
+            const dish = document.getElementById('dish-name').value.trim();
+            const meal = document.getElementById('meal-time').value.trim();
+            const outputContent = document.getElementById('outputContent');
+            const dishImage = document.getElementById('dish-image');
 
-  if (imageJson.hits && imageJson.hits.length > 0) {
-    imageElement.src = imageJson.hits[0].webformatURL;
-    imageElement.style.display = "block";
-  } else {
-    imageElement.style.display = "none";
-  }
-} catch (imgErr) {
-  console.warn("Image fetch failed:", imgErr);
-} finally {
-    toggleCookingAnimation(false);
-  }
-} catch (err) {
-    outputContent.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
-    dishImage.style.display = 'none';
-  } finally {
-    toggleCookingAnimation(false);
-  }
-};
+            if (!dish || !meal) {
+                outputContent.innerHTML = '<span style="color:#FFD700;">❌ Please enter both dish name and meal time.</span>';
+                dishImage.style.display = 'none';
+                return;
+            }
 
-    
-function saveAsPDF() {
-  const dish = document.getElementById('dish-name').value.trim() || 'recipe';
-  const outputContent = document.getElementById('outputContent');
-  const outputText = outputContent.innerText.trim();
+            toggleCookingAnimation(true);
+            outputContent.innerHTML = '👨‍🍳 Generating your recipe...';
+            dishImage.style.display = 'none';
 
-  // ✅ Prevent saving default or empty output
-  if (
-    !outputText ||
-    outputText === 'Generating recipe...' ||
-    outputText.includes('Recipe output will appear here')
-  ) {
-    alert("⚠️ No valid recipe to save.");
-    return;
-  }
+            const prompt = `Provide ingredients and preparation method for '${dish}' suitable for a healthy person during '${meal}' time. Use headings: Ingredients and Preparation Method.`;
 
-  // ✅ Access jsPDF from window
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  const lines = doc.splitTextToSize(outputText, 180);
+            try {
+                const response = await fetch("/api/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt })
+                });
+                const data = await response.json();
 
-  const backgroundImage = new Image();
-  backgroundImage.src = 'static/pdfbg.jpg'; // ✅ Make sure this file exists
+                if (!data.text) throw new Error(data.error || "No response");
 
-  backgroundImage.onload = function () {
-    let y = 10;
+                outputContent.innerHTML = data.text.replace(/\n/g, '<br>');
+                
+                document.getElementById('dish-name').value = '';
+                document.getElementById('meal-time').value = '';
 
-    doc.addImage(backgroundImage, 'JPEG', 0, 0, 210, 297); // A4 page
+                // Fetch image from Pixabay
+                const pixabayKey = "51164837-d21699e326105178316bad47a";
+                const imageQuery = encodeURIComponent(dish);
+                const pixabayUrl = `https://pixabay.com/api/?key=${pixabayKey}&q=${imageQuery}&image_type=photo&category=food&per_page=3`;
 
-    lines.forEach((line) => {
-      if (y > 280) {
-        doc.addPage();
-        doc.addImage(backgroundImage, 'JPEG', 0, 0, 210, 297);
-        y = 10;
-      }
-      doc.text(line, 10, y);
-      y += 10;
-    });
+                try {
+                    const imageRes = await fetch(pixabayUrl);
+                    const imageJson = await imageRes.json();
+                    
+                    if (imageJson.hits && imageJson.hits.length > 0) {
+                        dishImage.src = imageJson.hits[0].webformatURL;
+                        dishImage.style.display = "block";
+                    }
+                } catch (imgErr) {
+                    console.warn("Image fetch failed:", imgErr);
+                }
+            } catch (err) {
+                outputContent.innerHTML = `<span style="color:#FFD700;">❌ Error: ${err.message}</span>`;
+                dishImage.style.display = 'none';
+            } finally {
+                toggleCookingAnimation(false);
+            }
+        };
 
-    doc.save(`${dish.replace(/\s+/g, '_')}.pdf`);
-  };
+        function saveAsPDF() {
+            const outputContent = document.getElementById('outputContent');
+            const outputText = outputContent.innerText.trim();
 
-  backgroundImage.onerror = function () {
-    alert("⚠️ PDF background image not found or failed to load.");
-  };
-}
+            if (!outputText || outputText.includes('will appear here') || outputText.includes('Generating')) {
+                alert("⚠️ No valid recipe to save.");
+                return;
+            }
 
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const lines = doc.splitTextToSize(outputText, 180);
 
-  </script>
+            let y = 20;
+            lines.forEach((line) => {
+                if (y > 280) {
+                    doc.addPage();
+                    y = 20;
+                }
+                doc.text(line, 10, y);
+                y += 10;
+            });
+
+            const dish = document.getElementById('dish-name').value.trim() || 'recipe';
+            doc.save(`${dish.replace(/\s+/g, '_')}.pdf`);
+        }
+    </script>
 </body>
 </html>
